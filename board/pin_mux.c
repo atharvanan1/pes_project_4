@@ -78,12 +78,6 @@ void BOARD_InitPins(void)
     /* PORTB19 (pin 54) is configured as PTB19 */
     PORT_SetPinMux(BOARD_INITPINS_LED_GREEN_PORT, BOARD_INITPINS_LED_GREEN_PIN, kPORT_MuxAsGpio);
 
-    /* PORTC8 (pin 65) is configured as I2C0_SCL */
-    PORT_SetPinMux(PORTC, 8U, kPORT_MuxAlt2);
-
-    /* PORTC9 (pin 66) is configured as I2C0_SDA */
-    PORT_SetPinMux(PORTC, 9U, kPORT_MuxAlt2);
-
     /* PORTD1 (pin 74) is configured as PTD1 */
     PORT_SetPinMux(BOARD_INITPINS_LED_BLUE_PORT, BOARD_INITPINS_LED_BLUE_PIN, kPORT_MuxAsGpio);
 
