@@ -7,15 +7,33 @@
 
 #include "logger.h"
 
-void test_writeLog(uint8_t log_level, const char *msg, ... )
+typedef struct {
+		log_level_t Logger_Log_Level;
+		silent_t Logger_Silent_Mode;
+}logger_data;
+
+logger_data thisLogger;
+
+void Log_Write(const char *msg, ... )
 {
 	va_list args;
-	void* args_array[10];
-	uint8_t arg_counts = 0;
 	va_start(args, msg);
 
 	// Log Level Logic
 
+
 	// Pure print
 	vprintf(msg, args);
 }
+
+void Log_Silent (silent_t silent)
+{
+
+}
+
+void Set_Log_Level (log_level_t level)
+{
+
+}
+
+logger_instance const logger = {Log_Write, Log_Silent, Set_Log_Level};

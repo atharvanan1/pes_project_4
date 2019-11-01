@@ -6,6 +6,8 @@
  */
 #include "test.h"
 
+state_t errno;
+
 void unit_tests(void)
 {
 	UCUNIT_TestcaseBegin("Starting Demo Test Case\n\r");
@@ -14,10 +16,11 @@ void unit_tests(void)
 	UCUNIT_TestcaseEnd();
 
 	UCUNIT_TestcaseBegin("Test Case for Write Log\n\r");
-	int integer = 5;
-	char* string = "HHHH";
-	char character = 'c';
-	test_writeLog(1, "Here is a test message, %d, %s, %c\n\r", integer, string, character);
+	errno = POST_Failed;
+//	int integer = 5;
+//	char* string = "HHHH";
+//	char character = 'c';
+	logger.Log_Write("%s\n\r", Get_Error_Message(errno));
 	UCUNIT_TestcaseEnd();
  }
 

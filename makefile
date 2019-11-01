@@ -91,6 +91,7 @@ ARM_OBJS := \
 		   $(DEBUG)/source/i2c/i2c.o \
 		   $(DEBUG)/source/led_control/led_control.o \
 		   $(DEBUG)/source/logger/logger.o \
+		   $(DEBUG)/source/logger/errno.o \
 		   $(DEBUG)/source/POST/post.o \
 		   $(DEBUG)/source/state_machine/state_machine.o \
 		   $(DEBUG)/source/uctest/System.o \
@@ -114,6 +115,7 @@ ARM_DEPS := \
 		   $(DEBUG)/source/i2c/i2c.d \
 		   $(DEBUG)/source/led_control/led_control.d \
 		   $(DEBUG)/source/logger/logger.d \
+		   $(DEBUG)/source/logger/errno.d \
 		   $(DEBUG)/source/POST/post.d \
 		   $(DEBUG)/source/state_machine/state_machine.d \
 		   $(DEBUG)/source/uctest/System.d \

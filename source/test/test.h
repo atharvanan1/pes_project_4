@@ -20,4 +20,6 @@
 
 #include "state_machine.h"
 #include "logger.h"
+#include "errno.h"
+
 #endif /* TEST_TEST_H_ */
