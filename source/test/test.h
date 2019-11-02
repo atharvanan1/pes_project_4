@@ -21,5 +21,7 @@
 #include "state_machine.h"
 #include "logger.h"
 #include "errno.h"
+#include "i2c.h"
+#include "tmp102.h"
 
 #endif /* TEST_TEST_H_ */

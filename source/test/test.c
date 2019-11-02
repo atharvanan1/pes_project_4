@@ -22,7 +22,17 @@ void unit_tests(void)
 //	char character = 'c';
 	logger.Log_Write("%s\n\r", Get_Error_Message(errno));
 	UCUNIT_TestcaseEnd();
- }
+
+	uint16_t dummy;
+	UCUNIT_TestcaseBegin("Test Case for I2C Read Opeartion\n\r");
+	if(I2C_Init())
+	{
+		logger.Log_Write("Initialization successful!\n\r");
+	}
+	logger.Log_Write("I2C Data Receive is %d\n\r", dummy = I2C_Read_From_Slave());
+	logger.Log_Write("Temperature Data is %d\n\r", get_temperature(dummy));
+	UCUNIT_TestcaseEnd();
+}
 
 int main(void)
 {

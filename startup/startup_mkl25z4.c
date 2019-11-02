@@ -382,8 +382,11 @@ WEAK_AV void NMI_Handler(void)
 { while(1) {}
 }
 
+//#include <stdio.h>
 WEAK_AV void HardFault_Handler(void)
-{ while(1) {}
+{
+	//printf("\n\rHARDFAULT\n\r");
+	while(1) {}
 }
 
 WEAK_AV void SVC_Handler(void)

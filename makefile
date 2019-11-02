@@ -89,6 +89,7 @@ ARM_INCS := \
 # ARM Object Files 
 ARM_OBJS := \
 		   $(DEBUG)/source/i2c/i2c.o \
+		   $(DEBUG)/source/i2c/tmp102.o \
 		   $(DEBUG)/source/led_control/led_control.o \
 		   $(DEBUG)/source/logger/logger.o \
 		   $(DEBUG)/source/logger/errno.o \
@@ -113,6 +114,7 @@ ARM_OBJS := \
 # ARM Dependencies Files	   
 ARM_DEPS := \
 		   $(DEBUG)/source/i2c/i2c.d \
+		   $(DEBUG)/source/i2c/tmp102.d \
 		   $(DEBUG)/source/led_control/led_control.d \
 		   $(DEBUG)/source/logger/logger.d \
 		   $(DEBUG)/source/logger/errno.d \
