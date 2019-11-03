@@ -6,21 +6,64 @@
  */
 #include "test.h"
 
-state_t errno;
+error_t errno;
+state_machine_t* current_state_machine;
+state_t* current_state;
+event_t* current_event;
 
 void unit_tests(void)
 {
-	UCUNIT_TestcaseBegin("Starting Demo Test Case\n\r");
-	int a = test_state_machine();
-	UCUNIT_CheckIsEqual(a, 0);
-	UCUNIT_TestcaseEnd();
-
 	UCUNIT_TestcaseBegin("Test Case for Write Log\n\r");
 	errno = POST_Failed;
 //	int integer = 5;
 //	char* string = "HHHH";
 //	char character = 'c';
 	logger.Log_Write("%s\n\r", Get_Error_Message(errno));
+	UCUNIT_TestcaseEnd();
+
+	UCUNIT_TestcaseBegin("Test Case for State Machine Init\n\r");
+	state_machine_init(&sm1);
+	if(current_state_machine->machine == State_Machine_1)
+	{
+		// Print State Machine Message
+		errno = Entering_SM1;
+		logger.Log_Write("%s\n\r", Get_Error_Message(errno));
+		// Do something with the event, but we already know the event
+		// Maybe we can add a function which will figure out what to give to current_event
+		// pointer
+		int i = 1;
+		while(i)
+		{
+			switch(current_state->id)
+			{
+			case Temperature_Reading:
+				if(valid_event(current_event, temp_reading))
+				{
+					trigger(current_event);
+				}
+				break;
+			case Average_Wait:
+				if(valid_event(current_event, average_wait))
+				{
+					trigger(current_event);
+				}
+				break;
+			case Temperature_Alert:
+				if(valid_event(current_event, temp_alert))
+				{
+					trigger(current_event);
+				}
+				break;
+			case Disconnected:
+				if(valid_event(current_event, disconnected))
+				{
+					trigger(current_event);
+					i = 0;
+				}
+				break;
+			}
+		}
+	}
 	UCUNIT_TestcaseEnd();
 
 	uint16_t dummy;

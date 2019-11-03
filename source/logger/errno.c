@@ -7,7 +7,7 @@
 
 #include "errno.h"
 
-const char* Get_Error_Message(state_t error)
+const char* Get_Error_Message(error_t error)
 {
 	switch(error)
 	{
@@ -70,6 +70,9 @@ const char* Get_Error_Message(state_t error)
 		break;
 	case Device_Disconnected:
 		return "Device Disconnected";
+		break;
+	case Unhandled_Exception:
+		return "Unhandled Exception";
 		break;
 	default:
 		return "Incorrect Status Code";

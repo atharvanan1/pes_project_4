@@ -22,5 +22,4 @@ typedef struct {
 }logger_instance;
 
 extern logger_instance const logger;
-
 #endif /* LOGGER_LOGGER_H_ */

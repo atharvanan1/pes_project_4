@@ -11,7 +11,7 @@
 #include "MKL25Z4.h"
 
 #define MSB			(0x01 << 11)
-#define RESOLUTION 	0x0625
+#define RESOLUTION 	0.0625
 
 // Struct for device addresses and registers
 typedef struct {

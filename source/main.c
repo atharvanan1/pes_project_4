@@ -9,7 +9,9 @@
 
 int main(void)
 {
-
+	getEvent();
+	state_machine_1();
+	state_machine_2();
 }
 
 void PORTA_IRQHandler(void)

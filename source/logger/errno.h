@@ -29,11 +29,12 @@ typedef enum {
 	LED_Green_OFF					= 0x8202,
 	LED_Blue_ON						= 0x8401,
 	LED_Blue_OFF					= 0x8402,
+	Unhandled_Exception				= 0xEEEE,
 	Device_Disconnected 			= 0xFFFF,
-}state_t;
+}error_t;
 
-extern state_t errno;
+extern error_t errno;
 
-const char* Get_Error_Message(state_t error);
+const char* Get_Error_Message(error_t error);
 
 #endif /* LOGGER_ERRNO_H_ */

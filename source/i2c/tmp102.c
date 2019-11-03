@@ -13,16 +13,12 @@ int16_t get_temperature(uint16_t data)
 	if ((data & MSB) == 1)
 	{
 		// Negative temperatures
-		data = ~data;
-		data = data & 0x0FFF;
-		data = data + 1;
-		data = data * -1;
 		data = ((~data & 0x0FFF) + 1) * -1;
 		return data * RESOLUTION;
 	}
 	else if ((data & MSB) == 0)
 	{
-		return (data & 0x0FFF) * RESOLUTION;
+		return data * RESOLUTION;
 	}
 }
 
