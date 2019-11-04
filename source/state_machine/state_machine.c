@@ -8,97 +8,179 @@
 
 #include "state_machine.h"
 
-state_machine_t sm1 = {State_Machine_1, {Temperature_Reading, Average_Wait, Temperature_Alert, Disconnected}};
-state_machine_t sm2 = {State_Machine_2, {Temperature_Reading, Average_Wait, Temperature_Alert, Disconnected}};
-state_t temp_reading = {Temperature_Reading, {Start, Read_Complete, Alert, Timeout_Complete, Disconnect}};
-state_t average_wait = {Average_Wait, {Read_Complete, Timeout_Complete, Disconnect}};
-state_t temp_alert  = {Temperature_Alert, {Alert, Disconnect}};
-state_t disconnected = {Temperature_Reading, {Disconnect}};
-event_t start = {Start};
-event_t read_complete = {Read_Complete};
-event_t alert = {Alert};
-event_t disconnect = {Disconnect};
-event_t timeout = {Timeout_Complete};
-
+/*
+ * Function -
+ */
 void Print_Message(error_t error)
 {
 	errno = error;
 	logger.Log_Write("%s\n\r", Get_Error_Message(errno));
 }
 
-void trigger(event_t* event)
+/*
+ * Function -
+ */
+void End_Program(void)
 {
-	switch(event->id)
-	{
-	case Start:
-		transition(&temp_reading);
-		current_event = &read_complete;
-		uint16_t temperature = I2C_Read_From_Slave();
-		logger.Log_Write("Temperature is %d\n\r", get_temperature(dummy));
-		Print_Message(Reading_Temperature);
-		break;
-	case Read_Complete:
-		transition(&average_wait);
-		Print_Message(Reading_Temperature_Complete);
-		break;
-	case Alert:
-		transition(&temp_alert);
-		Print_Message(Alert_LOW_Temperature);
-	case Disconnect:
-		transition(&disconnected);
-		Print_Message(Device_Disconnected);
-		break;
-	case Timeout_Complete:
-		transition(&temp_reading);
-		Print_Message(Timeout);
-		Print_Message(Reading_Temperature);
-		break;
-	default:
-		Print_Message(Unhandled_Exception);
-		break;
-	}
+	logger.Log_Write("Ending Program");
+	while(1);
 }
 
-void transition(state_t* state)
+/*
+ * Function -
+ */
+state_machine_t* State_Machine_Init(void)
 {
-	current_state = state;
+	state_machine_t* sm = (state_machine_t *) malloc(sizeof(state_machine_t));
+
+	if(sm == NULL)
+	{
+		logger.Log_Write("Failure to initialize State Machine\n\r");
+		return NULL;
+	}
+
+	sm->state = sTemperature_Reading;
+	sm->event = eStart;
+
+	return sm;
 }
 
-uint8_t valid_event(event_t* event, state_t state)
+/*
+ * Function -
+ */
+void State_Machine_End(state_machine_t* sm)
 {
-	uint8_t length;
+	if(sm == NULL)
+		return;
 
-	if(state.id == Temperature_Reading)
-	{
-		length = 5;
-	}
-	else if(state.id == Average_Wait)
-	{
-		length = 3;
-	}
-	else if(state.id == Temperature_Alert)
-	{
-		length = 2;
-	}
-	else if(state.id == Disconnected)
-	{
-		length = 1;
-	}
+	free(sm);
+	sm = NULL;
+}
 
-	for (uint8_t i = 0; i < length; i++)
+/*
+ * Function -
+ */
+void Set_Event(state_machine_t* sm, event_t event)
+{
+	sm->event = event;
+}
+
+/*
+ * Function -
+ */
+void Set_State(state_machine_t* sm, state_t state)
+{
+	sm->state = state;
+}
+
+/*
+ * Function -
+ */
+void Event_Handler(state_machine_t* sm, system_state_t* system)
+{
+	switch(sm->state)
 	{
-		if(event->id == state.valid_events[i])
+	case sTemperature_Reading:
+		if(system->alert == 1)
 		{
-			return 1;
+			Set_Event(sm, eAlert);
 		}
+		if(system->disconnect == 1)
+		{
+			Set_Event(sm, eDisconnect);
+		}
+		if(sm->event == eStart)
+		{
+			Print_Message(Reading_Temperature);
+//			I2C_Init();
+//			int16_t temp = I2C_Read_Temperature();
+//			system->temperature = Get_Temperature(temp);
+			logger.Log_Write("Temperature is %d\n\r", system->temperature);
+			Print_Message(Reading_Temperature_Complete);
+			Set_State(sm, sAverage_Wait);
+			Set_Event(sm, eRead_Complete);
+		}
+		if(sm->event == eRead_Complete)
+		{
+			;
+		}
+		if(sm->event == eAlert)
+		{
+			Set_State(sm, sTemperature_Alert);
+		}
+		if(sm->event == eTimeout_Complete)
+		{
+			;
+		}
+		if(sm->event == eDisconnect)
+		{
+			Set_State(sm, sDisconnected);
+		}
+		break;
+	case sAverage_Wait:
+		if(system->disconnect == 1)
+		{
+			Set_Event(sm, eDisconnect);
+		}
+		if(sm->event == eRead_Complete)
+		{
+			if(system->timeout_started != 1)
+			{
+				Print_Message(Waiting);
+				system->counter = 0;
+				system->timeout_started = 1;
+			}
+			else
+			{
+				if(system->counter == 150)
+				{
+					Set_Event(sm, eTimeout_Complete);
+					Print_Message(Timeout);
+					system->timeout_started = 0;
+				}
+			}
+		}
+		if(sm->event == eAlert)
+		{
+			;
+		}
+		if(sm->event == eTimeout_Complete)
+		{
+			system->timeout_count++;
+			if(system->timeout_count)
+			{
+				//End this state machine, find out how
+			}
+			Set_State(sm, sTemperature_Reading);
+			Set_Event(sm, eStart);
+		}
+		if(sm->event == eDisconnect)
+		{
+			Set_State(sm, sDisconnected);
+		}
+		break;
+	case sTemperature_Alert:
+		if(system->disconnect == 1)
+		{
+			Set_Event(sm, eDisconnect);
+		}
+		if(sm->event == eAlert)
+		{
+			Print_Message(Alert_LOW_Temperature);
+			Set_State(sm, sAverage_Wait);
+			Set_Event(sm, eRead_Complete);
+		}
+		if(sm->event == eDisconnect)
+		{
+			Set_State(sm, sDisconnected);
+		}
+		break;
+	case sDisconnected:
+		if(sm->event == eDisconnect)
+		{
+			Print_Message(Device_Disconnected);
+			End_Program();
+		}
+		break;
 	}
-	return 0;
 }
-
-void state_machine_init(state_machine_t* state_machine)
-{
-	current_state_machine = state_machine;
-	current_event = &start;
-	current_state = &temp_reading;
-}
-

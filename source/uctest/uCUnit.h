@@ -556,7 +556,7 @@ static int ucunit_index = 0; /* Tracepoint index */
     {                                                                     \
         UCUNIT_WriteString("\n\r======================================\n\r"); \
         UCUNIT_WriteString(name);                                         \
-        UCUNIT_WriteString("\n\r======================================\n\r"); \
+        UCUNIT_WriteString("======================================\n\r"); \
         ucunit_testcases_failed_checks = ucunit_checks_failed;            \
     }                                                                     \
     while(0)

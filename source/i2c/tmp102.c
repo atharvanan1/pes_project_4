@@ -7,7 +7,7 @@
 
 #include "tmp102.h"
 
-int16_t get_temperature(uint16_t data)
+int16_t Get_Temperature(uint16_t data)
 {
 	data = data & 0x0FFF;
 	if ((data & MSB) == 1)

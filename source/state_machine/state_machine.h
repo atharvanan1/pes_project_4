@@ -11,63 +11,45 @@
 #include <stdlib.h>
 #include "logger.h"
 #include "errno.h"
+#include "tmp102.h"
+#include "i2c.h"
 
 typedef enum {
-	Start = 0x00,
-	Read_Complete = 0x01,
-	Alert = 0x02,
-	Timeout_Complete = 0x04,
-	Disconnect = 0x08,
-} event_id;
+	eStart = 0x00,
+	eRead_Complete = 0x01,
+	eAlert = 0x02,
+	eTimeout_Complete = 0x04,
+	eDisconnect = 0x08,
+} event_t;
 
 typedef enum {
-	Temperature_Reading = 0x01,
-	Average_Wait = 0x02,
-	Temperature_Alert = 0x04,
-	Disconnected = 0x08,
-} state_id;
-
-typedef enum {
-	State_Machine_1 = 0x01,
-	State_Machine_2 = 0x02,
-} state_machine_id;
+	sTemperature_Reading = 0x01,
+	sAverage_Wait = 0x02,
+	sTemperature_Alert = 0x04,
+	sDisconnected = 0x08,
+} state_t;
 
 typedef struct {
-	state_machine_id machine;
-	state_id states[];
+	state_t state;
+	event_t event;
 } state_machine_t;
 
 typedef struct {
-	event_id id;
-} event_t;
+	int16_t temperature;
+	int16_t average_temperature;
+	uint8_t timeout_count;
+	uint32_t counter;
+	uint8_t timeout_started;
+	uint8_t disconnect;
+	uint8_t alert;
+} system_state_t;
 
-typedef struct {
-	state_id id;
-	event_id valid_events[];
-} state_t;
-
-extern state_t* current_state;
-extern event_t* current_event;
-extern state_machine_t* current_state_machine;
-
-extern state_machine_t sm1;
-extern state_machine_t sm2;
-
-extern state_t temp_reading;
-extern state_t average_wait;
-extern state_t temp_alert;
-extern state_t disconnected;
-
-extern event_t start;
-extern event_t read_complete;
-extern event_t alert;
-extern event_t disconnect;
-extern event_t timeout;
-
-void trigger(event_t* event);
-void transition(state_t* state);
-uint8_t valid_event(event_t* event, state_t state);
-void state_machine_init(state_machine_t* state_machine);
+void End_Program(void);
+state_machine_t* State_Machine_Init(void);
+void State_Machine_End(state_machine_t* sm);
+void Set_Event(state_machine_t* sm, event_t event);
+void Set_State(state_machine_t* sm, state_t state);
+void Event_Handler(state_machine_t* sm, system_state_t* system);
 void Print_Message(error_t error);
 
 #endif /* STATE_MACHINE_STATE_MACHINE_H_ */

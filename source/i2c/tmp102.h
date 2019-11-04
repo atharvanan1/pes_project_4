@@ -25,5 +25,5 @@ typedef struct {
 extern device TMP102;
 
 // Functions
-int16_t get_temperature(uint16_t data);
+int16_t Get_Temperature(uint16_t data);
 #endif /* I2C_TMP102_H_ */
