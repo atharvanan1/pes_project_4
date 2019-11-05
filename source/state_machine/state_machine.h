@@ -42,6 +42,7 @@ typedef struct {
 	uint8_t timeout_started;
 	uint8_t disconnect;
 	uint8_t alert;
+	uint8_t state_machine_id;
 } system_state_t;
 
 void End_Program(void);

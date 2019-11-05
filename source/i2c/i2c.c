@@ -22,13 +22,13 @@ uint8_t I2C_Init(void)
 	I2C0->F	|= I2C_F_ICR(0x3D);
 	I2C0->C1 |= I2C_C1_IICEN_MASK; // | I2C_C1_IICIE_MASK;
 	I2C0->C2 |= I2C_C2_HDRS_MASK;
-    I2C0->SLTH |= I2C_SLTL_SSLT(0xFF);
+    I2C0->SLTH |= I2C_SLTL_SSLT(0x01);
 	return 1;
 }
 
 uint8_t I2C_Check_Connect(void)
 {
-
+	I2C_Init();
 }
 
 uint16_t I2C_Read(uint8_t register_address)
@@ -43,62 +43,63 @@ uint16_t I2C_Read(uint8_t register_address)
 	// Send slave address
 	I2C0->D = (TMP102.address << 1) | WRITE;
 
-	// Wait for acknowledge by Slave
-	while((I2C0->S & I2C_S_IICIF_MASK) == 0){ }
+	// Wait for ACK
+	while((I2C0->S & I2C_S_IICIF_MASK) == 0);
 	I2C0->S |= I2C_S_IICIF_MASK;
 
-	// Send register address
+	// Send slave address
 	I2C0->D = register_address;
 
-	// Wait for acknowledge by Slave
-	while((I2C0->S & I2C_S_IICIF_MASK) == 0){ }
+	// Wait for ACK
+	while((I2C0->S & I2C_S_IICIF_MASK) == 0);
 	I2C0->S |= I2C_S_IICIF_MASK;
 
-	// Sent repeated start
+	// Send repeated start
 	I2C0->C1 |= I2C_C1_RSTA_MASK;
 
-	// Initiate read operation
+	// Send slave address
 	I2C0->D = (TMP102.address << 1) | READ;
 
-	// Wait for acknowledge by Slave
-	while((I2C0->S & I2C_S_IICIF_MASK) == 0){ }
+	// Wait for ACK
+	while((I2C0->S & I2C_S_IICIF_MASK) == 0);
 	I2C0->S |= I2C_S_IICIF_MASK;
 
-	// Change to Receiver mode
+	// Receiver Mode
 	I2C0->C1 &= ~I2C_C1_TX_MASK;
 
 	// Send ACK
 	I2C0->C1 &= ~I2C_C1_TXAK_MASK;
 
-	// Do a dummy read
+	// Dummy read
 	read = I2C0->D;
 
 	// Wait for data
-	while((I2C0->S & I2C_S_IICIF_MASK) == 0){ }
+	while((I2C0->S & I2C_S_IICIF_MASK) == 0);
 	I2C0->S |= I2C_S_IICIF_MASK;
 
-	// Read data
+	// Send ACK
+	I2C0->C1 &= ~I2C_C1_TXAK_MASK;
+
+	// Proper Read
 	read = I2C0->D;
-	if(register_address == TMP102.tmp_reg_address)
-		data = read << 4;
-	else
-		data = read << 8;
-	logger.Log_Write("%x.\n\r", read);
+	logger.Log_Write("%d\n\r", read);
+	data = read << 8;
 
 	// Wait for data
-	while((I2C0->S & I2C_S_IICIF_MASK) == 0){ }
+	while((I2C0->S & I2C_S_IICIF_MASK) == 0);
 	I2C0->S |= I2C_S_IICIF_MASK;
 
-	//Send NACK
+	// Send NACK
 	I2C0->C1 |= I2C_C1_TXAK_MASK;
 
-	// Read data
+	// Proper Read
 	read = I2C0->D;
-	if(register_address == TMP102.tmp_reg_address)
-		data = read >> 4;
-	else
-		data |= read;
-	logger.Log_Write("%x\n\r", read);
+	logger.Log_Write("%d\n\r", read);
+	data |= read;
+
+	// Wait for data
+	while((I2C0->S & I2C_S_IICIF_MASK) == 0);
+	I2C0->S |= I2C_S_IICIF_MASK;
 
 	// Send stop signal
 	I2C0->C1 &= ~I2C_C1_MST_MASK;

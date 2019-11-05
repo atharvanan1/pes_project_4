@@ -9,7 +9,7 @@
 
 int16_t Get_Temperature(uint16_t data)
 {
-	data = data & 0x0FFF;
+	data = data >> 4;
 	if ((data & MSB) == 1)
 	{
 		// Negative temperatures

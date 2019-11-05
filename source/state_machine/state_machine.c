@@ -179,7 +179,7 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 		if(sm->event == eDisconnect)
 		{
 			Print_Message(Device_Disconnected);
-			End_Program();
+			exit(1);
 		}
 		break;
 	}

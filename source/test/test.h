@@ -23,5 +23,6 @@
 #include "errno.h"
 #include "i2c.h"
 #include "tmp102.h"
+#include "post.h"
 
 #endif /* TEST_TEST_H_ */
