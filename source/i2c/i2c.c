@@ -11,11 +11,16 @@ uint8_t I2C_Init(void)
 {
 	// Enabling clock on Port C and I2C0 peripheral
 	SIM->SCGC4 |= SIM_SCGC4_I2C0_MASK;
-	SIM->SCGC5 |= SIM_SCGC5_PORTC_MASK;
+	SIM->SCGC5 |= SIM_SCGC5_PORTA_MASK | SIM_SCGC5_PORTC_MASK;
 
 	// Configuring Port C
 	PORTC->PCR[8] |= PORT_PCR_MUX(2);
 	PORTC->PCR[9] |= PORT_PCR_MUX(2);
+
+	// Port A Pin 5 setup - GPIO, Rising Edge Interrupt, Pulldown
+	PORTA->PCR[5] = 0;
+	PORTA->PCR[5] |= PORT_PCR_MUX(1) | PORT_PCR_IRQC(0x09) | PORT_PCR_PE_MASK;
+	GPIOA->PDDR |= ALERT_PIN;
 
 	// Configuring I2C Peripheral
 	I2C0->F |= I2C_F_MULT(0x01);
@@ -23,6 +28,7 @@ uint8_t I2C_Init(void)
 	I2C0->C1 |= I2C_C1_IICEN_MASK; // | I2C_C1_IICIE_MASK;
 	I2C0->C2 |= I2C_C2_HDRS_MASK;
     I2C0->SLTH |= I2C_SLTL_SSLT(0x01);
+
 	return 1;
 }
 

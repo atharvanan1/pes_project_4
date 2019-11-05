@@ -167,6 +167,8 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 		if(sm->event == eAlert)
 		{
 			Print_Message(Alert_LOW_Temperature);
+			if((GPIOA->PDIR & ALERT_PIN) == 0)
+				system->alert = 0;
 			Set_State(sm, sAverage_Wait);
 			Set_Event(sm, eRead_Complete);
 		}

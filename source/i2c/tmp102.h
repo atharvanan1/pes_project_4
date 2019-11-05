@@ -12,6 +12,7 @@
 
 #define MSB			(0x01 << 11)
 #define RESOLUTION 	0.0625
+#define ALERT_PIN	(0x01 << 5)
 
 // Struct for device addresses and registers
 typedef struct {

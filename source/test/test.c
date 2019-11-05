@@ -67,3 +67,11 @@ void SysTick_Handler(void)
 		system_state->counter++;
 //	logger.Log_Write("%d\n\r", system_state->counter);
 }
+
+void PORTA_IRQHandler(void)
+{
+	if(PORTA->ISFR & ALERT_PIN)
+	{
+		system_state->alert = 1;
+	}
+}
