@@ -21,26 +21,26 @@ uint8_t I2C_Init(void)
 	PORTA->PCR[5] = 0;
 	PORTA->PCR[5] |= PORT_PCR_MUX(1) | PORT_PCR_IRQC(0x09) | PORT_PCR_PE_MASK;
 	GPIOA->PDDR |= ALERT_PIN;
+	NVIC_EnableIRQ(PORTA_IRQn);
+
 
 	// Configuring I2C Peripheral
-	I2C0->F |= I2C_F_MULT(0x01);
+	I2C0->F |= I2C_F_MULT(0x00);
 	I2C0->F	|= I2C_F_ICR(0x3D);
 	I2C0->C1 |= I2C_C1_IICEN_MASK; // | I2C_C1_IICIE_MASK;
 	I2C0->C2 |= I2C_C2_HDRS_MASK;
     I2C0->SLTH |= I2C_SLTL_SSLT(0x01);
-
 	return 1;
 }
 
 uint8_t I2C_Check_Connect(void)
 {
-	I2C_Init();
 }
 
 uint16_t I2C_Read(uint8_t register_address)
 {
 	uint16_t data = 0;
-	uint8_t read;
+	volatile uint8_t read;
 
 	// Send start bit
 	I2C0->C1 |= I2C_C1_TX_MASK;
@@ -88,7 +88,6 @@ uint16_t I2C_Read(uint8_t register_address)
 
 	// Proper Read
 	read = I2C0->D;
-	logger.Log_Write("%d\n\r", read);
 	data = read << 8;
 
 	// Wait for data
@@ -100,7 +99,6 @@ uint16_t I2C_Read(uint8_t register_address)
 
 	// Proper Read
 	read = I2C0->D;
-	logger.Log_Write("%d\n\r", read);
 	data |= read;
 
 	// Wait for data

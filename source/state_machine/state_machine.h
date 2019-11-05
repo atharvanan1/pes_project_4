@@ -29,9 +29,15 @@ typedef enum {
 	sDisconnected = 0x08,
 } state_t;
 
+typedef enum {
+	State_Driven = 0x01,
+	Table_Driven = 0x02,
+} state_machine_type_t;
+
 typedef struct {
 	state_t state;
 	event_t event;
+	state_machine_type_t type;
 } state_machine_t;
 
 typedef struct {
@@ -45,12 +51,23 @@ typedef struct {
 	uint8_t state_machine_id;
 } system_state_t;
 
+typedef struct {
+	state_t state_id;
+	void (*event_action[5])(state_machine_t* sm);
+}state_struct;
+
 void End_Program(void);
-state_machine_t* State_Machine_Init(void);
+state_machine_t* State_Machine_Init(state_machine_type_t);
 void State_Machine_End(state_machine_t* sm);
 void Set_Event(state_machine_t* sm, event_t event);
 void Set_State(state_machine_t* sm, state_t state);
 void Event_Handler(state_machine_t* sm, system_state_t* system);
 void Print_Message(error_t error);
+
+void fStart(state_machine_t* sm);
+void fRead_Complete(state_machine_t* sm);
+void fTimeoutComplete(state_machine_t* sm);
+void fAlert(state_machine_t* sm);
+void fDisconnect(state_machine_t* sm);
 
 #endif /* STATE_MACHINE_STATE_MACHINE_H_ */
