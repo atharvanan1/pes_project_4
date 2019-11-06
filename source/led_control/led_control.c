@@ -9,39 +9,50 @@
 
 #include "led_control.h"
 
-void Turn_On_Only_LED(uint8_t LED)
+/*
+ * Function - Turn_On_Only_LED
+ * Brief - Turns on specified LED
+ * Argument -
+ * led color enum
+ */
+void Turn_On_Only_LED(led_color_t LED)
 {
+	if(logger.Get_Log_Level() == lDebug)
+	{
+		logger.Log_Write(__func__, mDebug, "Turn ON LED Operation Started");
+	}
 	// LED_string is used to print messages
-	char* LED_string = NULL;
-	// KL25Z board specific LED operations
 	LED_RED_INIT(LOGIC_LED_OFF);
 	LED_BLUE_INIT(LOGIC_LED_OFF);
 	LED_GREEN_INIT(LOGIC_LED_OFF);
 
-	if(LED == RED)
+	if(LED == Red)
 	{
-		LED_string = "RED";
-		printf("LED %s is ON\n\r", LED_string);
+		errno = LED_Red_ON;
 		LED_RED_ON();
 		LED_GREEN_OFF();
 		LED_BLUE_OFF();
 	}
 
-	else if (LED == BLUE)
+	else if (LED == Blue)
 	{
-		LED_string = "BLUE";
-		printf("LED %s is ON\n\r", LED_string);
+		errno = LED_Blue_ON;
 		LED_RED_OFF();
 		LED_GREEN_OFF();
 		LED_BLUE_ON();
 	}
 
-	else if (LED == GREEN)
+	else if (LED == Green)
 	{
-		LED_string = "GREEN";
-		printf("LED %s is ON\n\r", LED_string);
+		errno = LED_Green_ON;
 		LED_RED_OFF();
 		LED_GREEN_ON();
 		LED_BLUE_OFF();
+	}
+
+	logger.Log_Write(__func__, mStatus, Get_Error_Message(errno));
+	if(logger.Get_Log_Level() == lDebug)
+	{
+		logger.Log_Write(__func__, mDebug, "Turn ON LED Operation Finshed");
 	}
 }

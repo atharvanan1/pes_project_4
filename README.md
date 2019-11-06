@@ -61,6 +61,9 @@ There are three targets
 
 * Designing a common state machine implementation where I can use state-driven and table-driven through a common interface.
 
+* Sharing resources between two functions would have been better. In Event Handler functions, I haven't abstracted away
+the subroutines because I was bothered about passing a lot of values to subroutine functions
+
 Feel free to give detailed feedback on the code. ^.^
 
 

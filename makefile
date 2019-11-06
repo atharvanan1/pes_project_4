@@ -158,23 +158,23 @@ endif
 $(EXE) : $(build_option)
 	
 #####################################################################
-# Rule for making KL25Z target without logging
+# Rule for compiling tests
 test : directories $(ARM_OBJS) $(SOURCE)/test/test.c
 	@$(ARM_CC) $(ARM_FLAGS) $(ARM_DEFS) $(ARM_INCS) ./source/test/test.c -o $(DEBUG)/source/test/test.o
 	@arm-none-eabi-gcc -nostdlib -Xlinker -Map="./Debug/pes_project_4.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m0plus -mthumb -T linkerfile.ld -o ./Debug/pes_project_4.axf $(ARM_OBJS) $(DEBUG)/source/test/test.o
 	@echo "Testing Code Compiled"
 
 #####################################################################
-# Rule for making KL25Z target with logging
+# Rule for compiling detailed debug log
 log : directories $(ARM_OBJS) $(SOURCE)/main.c
 	@$(ARM_CC) $(ARM_FLAGS) $(ARM_DEFS) $(ARM_INCS) -DLOG $(SOURCE)/main.c -o $(DEBUG)/source/main.o
 	@arm-none-eabi-gcc -nostdlib -Xlinker -Map="./Debug/pes_project_4.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m0plus -mthumb -T linkerfile.ld -o ./Debug/pes_project_4.axf $(ARM_OBJS) $(DEBUG)/source/main.o
 	@echo "KL25Z with logging on"
 
 #####################################################################
-# Rule for making PC target without logging	
+# Rule for compiling program with normal logging	
 run : directories $(ARM_OBJS) $(SOURCE)/main.c
-	@$(ARM_CC) $(ARM_FLAGS) $(ARM_DEFS) $(ARM_INCS) -DNOLOG $(SOURCE)/main.c -o $(DEBUG)/source/main.o
+	@$(ARM_CC) $(ARM_FLAGS) $(ARM_DEFS) $(ARM_INCS) -DRUN $(SOURCE)/main.c -o $(DEBUG)/source/main.o
 	@arm-none-eabi-gcc -nostdlib -Xlinker -Map="./Debug/pes_project_4.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m0plus -mthumb -T linkerfile.ld -o ./Debug/pes_project_4.axf $(ARM_OBJS) $(DEBUG)/source/main.o
 	@echo "KL25Z with logging off"
 

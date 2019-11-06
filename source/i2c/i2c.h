@@ -1,9 +1,11 @@
-/*
- * i2c.h
- *
- *  Created on: Oct 31, 2019
- *      Author: azzentys
- */
+/**
+  * File Name 		- i2c.h
+  * Description 	- header file for i2c.c
+  * Author			- Atharva Nandanwar
+  * Tools			- GNU C Compiler / ARM Compiler Toolchain
+  * Leveraged Code 	-
+  * URL				-
+  */
 
 #ifndef I2C_I2C_H_
 #define I2C_I2C_H_
@@ -16,10 +18,13 @@
 #define READ	1
 #define WRITE	0
 
-// Prototype Functions
+#define DISCONNECTED 1
+#define CONNECTED	 0
 
-uint8_t I2C_Init(void);
-uint8_t I2C_Check_Connect(void);
+// Prototype Functions
+void I2C_Init(void);
+void I2C_Alert_Init(void);
+uint8_t I2C_Check(void);
 uint16_t I2C_Read(uint8_t register_address);
 void I2C_Write(uint8_t register_address, uint8_t byte1, uint8_t byte2);
 #endif /* I2C_I2C_H_ */

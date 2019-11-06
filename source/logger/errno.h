@@ -1,14 +1,17 @@
-/*
- * errno.h
- *
- *  Created on: Oct 31, 2019
- *      Author: azzentys
- */
+/**
+  * File Name 		- errno.h
+  * Description 	- header file for errno.c
+  * Author			- Atharva Nandanwar
+  * Tools			- GNU C Compiler / ARM Compiler Toolchain
+  * Leveraged Code 	-
+  * URL				-
+  */
 
 #ifndef LOGGER_ERRNO_H_
 #define LOGGER_ERRNO_H_
 #include <stdint.h>
 
+// Error/Event Enum
 typedef enum {
 	Starting_Program 				= 0x0000,
 	Initiating_POST 				= 0x1000,
@@ -35,6 +38,7 @@ typedef enum {
 
 extern error_t errno;
 
+// Prototype function
 const char* Get_Error_Message(error_t error);
 
 #endif /* LOGGER_ERRNO_H_ */
