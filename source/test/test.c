@@ -1,43 +1,57 @@
-/*
- * test.c
- *
- *  Created on: Oct 31, 2019
- *      Author: azzentys
- */
+/**
+  * File Name 		- test.c
+  * Description 	- contains test cases for the program
+  * Author			- Atharva Nandanwar
+  * Tools			- GNU C Compiler / ARM Compiler Toolchain
+  * Leveraged Code 	-
+  * URL				-
+  */
+
 #include "test.h"
 
+// Global variables
 error_t errno;
 system_state_t __system = {0, 0, 0, 0, 0, 0, 0, 0};
 system_state_t* system_state = &__system;
 
+static inline void delay(void)
+{
+	for(volatile int i = 10000; i > 0; i--);
+}
+/*
+ * Function - unit_tests
+ * Brief - Executes unit tests
+ */
 void unit_tests(void)
 {
+	system_state->alert = 0;
 	UCUNIT_TestcaseBegin("Starting Test Cases\n\r");
 	UCUNIT_TestcaseBegin("Test Case for Write Log\n\r");
 	errno = post();
 	UCUNIT_CheckIsEqual(errno, POST_Successful);
-	logger.Log_Write("%s\n\r", Get_Error_Message(errno));
+	logger.Log_Write(__func__, mStatus, "%s", Get_Error_Message(errno));
 	UCUNIT_TestcaseEnd();
 
 	uint16_t dummy;
-	UCUNIT_TestcaseBegin("Test Case for I2C Read & Write Opeartion\n\r");
-	if(I2C_Init())
-	{
-		logger.Log_Write("Initialization successful!\n\r");
-	}
-	logger.Log_Write("I2C Write Operation\n\r");
-	logger.Log_Write("I2C Data Receive is %d\n\r", dummy = I2C_Read(TMP102.tmp_HI_reg_address));
+	UCUNIT_TestcaseBegin("Test Case for I2C Read & Write Operation\n\r");
+	I2C_Init();
+	I2C_Write(TMP102.tmp_LOW_reg_address, 0x00, 0x00);
+	delay();
+	logger.Log_Write(__func__, mStatus, "I2C Data Receive is %d", dummy = I2C_Read(TMP102.tmp_HI_reg_address));
 	UCUNIT_CheckIsEqual(dummy, 0x0500);
-	logger.Log_Write("I2C Data Receive is %d\n\r", dummy = I2C_Read(TMP102.tmp_LOW_reg_address));
+	delay();
+	logger.Log_Write(__func__, mStatus, "I2C Data Receive is %d", dummy = I2C_Read(TMP102.tmp_LOW_reg_address));
 	UCUNIT_CheckIsEqual(dummy, 0x0000);
-	logger.Log_Write("I2C Data Receive is %d\n\r", dummy = I2C_Read(TMP102.tmp_reg_address));
+	delay();
+	logger.Log_Write(__func__, mStatus, "I2C Data Receive is %d", dummy = I2C_Read(TMP102.tmp_reg_address));
+	delay();
 	UCUNIT_TestcaseEnd();
 
 	UCUNIT_TestcaseBegin("State Machine Testing - State Driven\n\r");
 	UCUNIT_TestcaseBegin("Test Case for State Machine Init\n\r");
 	state_machine_t* sm_test = NULL;
 	sm_test = (state_machine_t *) State_Machine_Init(Table_Driven);
-	logger.Log_Write("Testing initial cases\n\r");
+	logger.Log_Write(__func__, mStatus, "Testing initial cases");
 	UCUNIT_CheckIsEqual(sm_test->event, eStart);
 	UCUNIT_CheckIsEqual(sm_test->state, sTemperature_Reading);
 	UCUNIT_CheckIsEqual(sm_test->type, Table_Driven);
@@ -54,7 +68,7 @@ void unit_tests(void)
 	Event_Handler(sm_test, system_state);
 	UCUNIT_CheckIsEqual(sm_test->event, eRead_Complete);
 	UCUNIT_CheckIsEqual(sm_test->state, sAverage_Wait);
-	logger.Log_Write("%d\n\r", system_state->counter);
+	logger.Log_Write(__func__, mStatus, "%d", system_state->counter);
 	UCUNIT_CheckIsEqual(system_state->timeout_started, 1);
 	UCUNIT_TestcaseEnd();
 
@@ -83,24 +97,18 @@ void unit_tests(void)
 	UCUNIT_TestcaseBegin("Test Case for State Machine Alert in Reading State\n\r");
 	Event_Handler(sm_test, system_state);
 	UCUNIT_CheckIsEqual(sm_test->event, eAlert);
-	UCUNIT_CheckIsEqual(sm_test->state, sTemperature_Reading);
+	UCUNIT_CheckIsEqual(sm_test->state, sTemperature_Alert);
 	UCUNIT_TestcaseEnd();
 
 	UCUNIT_TestcaseBegin("Test Case for State Machine Alert State\n\r");
 	Event_Handler(sm_test, system_state);
-	UCUNIT_CheckIsEqual(sm_test->event, eAlert);
-	UCUNIT_CheckIsEqual(sm_test->state, sTemperature_Alert);
-	UCUNIT_TestcaseEnd();
-
-	UCUNIT_TestcaseBegin("Test Case for State Machine Alert Addressed, shifting to Wait\n\r");
-	Event_Handler(sm_test, system_state);
-	UCUNIT_CheckIsEqual(system_state->counter, 0);
 	UCUNIT_CheckIsEqual(sm_test->event, eRead_Complete);
 	UCUNIT_CheckIsEqual(sm_test->state, sAverage_Wait);
 	UCUNIT_TestcaseEnd();
 
 	UCUNIT_TestcaseBegin("Test Case for State Machine Alert Addressed, shifting to Wait\n\r");
 	Event_Handler(sm_test, system_state);
+	UCUNIT_CheckIsEqual(system_state->counter, 0);
 	UCUNIT_CheckIsEqual(sm_test->event, eRead_Complete);
 	UCUNIT_CheckIsEqual(sm_test->state, sAverage_Wait);
 	UCUNIT_TestcaseEnd();
@@ -129,6 +137,10 @@ void unit_tests(void)
 	UCUNIT_TestcaseEnd();
 }
 
+/*
+ * Function - Main
+ * Brief - Main testing routine
+ */
 int main(void)
 {
 	//Initializing board pins
@@ -150,17 +162,28 @@ int main(void)
 	return 0;
 }
 
+/*
+ * Function - SysTick_Handler
+ * Brief - Systick interrupt handler
+ */
 void SysTick_Handler(void)
 {
+	// Count up if timeout timer is started
 	if(system_state->timeout_started)
 		system_state->counter++;
 }
 
+/*
+ * Function - PORTA_IRQHandler
+ * Brief - Port A interrupt handler
+ */
 void PORTA_IRQHandler(void)
 {
+	// If interrupt from Pin 5, then set alert
 	if(PORTA->ISFR & ALERT_PIN)
 	{
 		system_state->alert = 1;
 	}
+	// Clearing the interrupt
 	PORTA->PCR[5] |= PORT_PCR_ISF_MASK;
 }

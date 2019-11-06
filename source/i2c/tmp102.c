@@ -20,6 +20,10 @@
  */
 int16_t Get_Temperature(uint16_t data)
 {
+	if(logger.Get_Log_Level() == lDebug)
+	{
+		logger.Log_Write(__func__, mDebug, "Starting Temperature Conversion Operation");
+	}
 	// Manipulation done after referring to TMP102
 	// datasheet
 	data = data >> 4;

@@ -1,9 +1,11 @@
-/*
- * state_machine.h
- *
- *  Created on: Oct 31, 2019
- *      Author: azzentys
- */
+/**
+  * File Name 		- state_machine.c
+  * Description 	- header file for state_machine.c
+  * Author			- Atharva Nandanwar
+  * Tools			- GNU C Compiler / ARM Compiler Toolchain
+  * Leveraged Code 	-
+  * URL				-
+  */
 
 #ifndef STATE_MACHINE_STATE_MACHINE_H_
 #define STATE_MACHINE_STATE_MACHINE_H_
@@ -50,6 +52,7 @@ typedef struct {
 	uint8_t disconnect;
 	uint8_t alert;
 	uint8_t state_machine_id;
+	uint8_t print_flag;
 } system_state_t;
 
 typedef struct {
@@ -63,12 +66,6 @@ void State_Machine_End(state_machine_t* sm);
 void Set_Event(state_machine_t* sm, event_t event);
 void Set_State(state_machine_t* sm, state_t state);
 void Event_Handler(state_machine_t* sm, system_state_t* system);
-void Print_Message(error_t error);
-
-void fStart(state_machine_t* sm);
-void fRead_Complete(state_machine_t* sm);
-void fTimeoutComplete(state_machine_t* sm);
-void fAlert(state_machine_t* sm);
-void fDisconnect(state_machine_t* sm);
+void Print_Message(const char* function_name, error_t error);
 
 #endif /* STATE_MACHINE_STATE_MACHINE_H_ */

@@ -11,6 +11,7 @@
 #define I2C_TMP102_H_
 #include <stdint.h>
 #include "MKL25Z4.h"
+#include "logger.h"
 
 // Macros
 #define MSB			(0x01 << 11)

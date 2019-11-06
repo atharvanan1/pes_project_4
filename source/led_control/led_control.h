@@ -14,8 +14,14 @@
 #include <stdint.h>
 #include "board.h"
 #include "logger.h"
-#define RED 	0
-#define BLUE  	1
-#define GREEN  	2
-void Turn_On_Only_LED(uint8_t LED_Macro);
+
+// Macros
+typedef enum {
+	Red,
+	Green,
+	Blue,
+} led_color_t;
+
+// Prototype Functions
+void Turn_On_Only_LED(led_color_t LED);
 #endif /* LED_CONTROL_H_ */

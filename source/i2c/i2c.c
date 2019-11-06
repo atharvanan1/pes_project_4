@@ -15,6 +15,10 @@
  */
 void I2C_Init(void)
 {
+	if(logger.Get_Log_Level() == lDebug)
+	{
+		logger.Log_Write(__func__, mDebug, "Starting I2C peripheral initialization");
+	}
 	// Enabling clock on Port C and I2C0 peripheral
 	SIM->SCGC4 |= SIM_SCGC4_I2C0_MASK;
 	SIM->SCGC5 |= SIM_SCGC5_PORTA_MASK | SIM_SCGC5_PORTC_MASK;
@@ -29,7 +33,9 @@ void I2C_Init(void)
 	I2C0->C1 |= I2C_C1_IICEN_MASK;
 	I2C0->C2 |= I2C_C2_HDRS_MASK;
     I2C0->SLTH |= I2C_SLTL_SSLT(0x01);
-	return 1;
+
+    // Log Message
+    logger.Log_Write(__func__, mStatus, "I2C peripheral initialized");
 }
 
 /*
@@ -38,12 +44,77 @@ void I2C_Init(void)
  */
 void I2C_Alert_Init(void)
 {
+	if(logger.Get_Log_Level() == lDebug)
+	{
+		logger.Log_Write(__func__, mDebug, "Starting TMP102 Alert Pin Initialization");
+	}
 	// Port A Pin 5 setup - GPIO, Rising Edge Interrupt, Pull Down
 	PORTA->PCR[5] |= PORT_PCR_MUX(1) | PORT_PCR_IRQC(0x09) | PORT_PCR_PE_MASK;
 	PORTA->PCR[5] &= ~PORT_PCR_PS_MASK;
 	GPIOA->PDDR &= ~ALERT_PIN;
 	NVIC_EnableIRQ(PORTA_IRQn);
-	return 1;
+
+    // Log Message
+    logger.Log_Write(__func__, mStatus, "TMP102 Alert Pin Initialized");
+}
+
+/*
+ * Function - I2C_Check
+ * Brief - function to check for disconnect event
+ * Return -
+ * returns connection status
+ */
+uint8_t I2C_Check(void)
+{
+	uint16_t data = 0;
+	volatile uint8_t read;
+
+	// Set I2C as Transmitter mode
+	I2C0->C1 |= I2C_C1_TX_MASK;
+
+	// Send start bit
+	I2C0->C1 |= I2C_C1_MST_MASK;
+
+	// Send slave address with write
+	I2C0->D = (TMP102.address << 1) | WRITE;
+
+	volatile int i = 0;
+	// Wait for ACK
+	while((I2C0->S & I2C_S_IICIF_MASK) == 0)
+	{
+		i++;
+		if(i >= 40000)
+		{
+			return DISCONNECTED;
+			break;
+		}
+	}
+	if((I2C0->S & I2C_S_IICIF_MASK) == 1)
+		return DISCONNECTED;
+	I2C0->S |= I2C_S_IICIF_MASK;
+
+	// Send register address
+	I2C0->D = TMP102.config_reg_address;
+
+	// Wait for ACK
+	while((I2C0->S & I2C_S_IICIF_MASK) == 0)
+	{
+		i++;
+		if(i >= 40000)
+		{
+			return DISCONNECTED;
+			break;
+		}
+	}
+	if((I2C0->S & I2C_S_IICIF_MASK) == 1)
+		return DISCONNECTED;
+
+	// Send stop signal
+	I2C0->C1 &= ~I2C_C1_MST_MASK;
+	I2C0->S |= I2C_S_IICIF_MASK;
+
+
+	return CONNECTED;
 }
 
 /*
@@ -56,6 +127,10 @@ void I2C_Alert_Init(void)
  */
 uint16_t I2C_Read(uint8_t register_address)
 {
+	if(logger.Get_Log_Level() == lDebug)
+	{
+		logger.Log_Write(__func__, mDebug, "Starting I2C Read Operation");
+	}
 	uint16_t data = 0;
 	volatile uint8_t read;
 
@@ -128,6 +203,8 @@ uint16_t I2C_Read(uint8_t register_address)
 	I2C0->C1 &= ~I2C_C1_MST_MASK;
 	I2C0->S |= I2C_S_IICIF_MASK;
 
+	logger.Log_Write(__func__, mStatus, "I2C Read Operation Finished");
+
 	return data;
 }
 
@@ -140,6 +217,10 @@ uint16_t I2C_Read(uint8_t register_address)
  */
 void I2C_Write(uint8_t register_address, uint8_t byte1, uint8_t byte2)
 {
+	if(logger.Get_Log_Level() == lDebug)
+	{
+		logger.Log_Write(__func__, mDebug, "Starting I2C Write Operation");
+	}
 	// Send start bit
 	I2C0->C1 |= I2C_C1_TX_MASK;
 	I2C0->C1 |= I2C_C1_MST_MASK;
@@ -175,4 +256,5 @@ void I2C_Write(uint8_t register_address, uint8_t byte1, uint8_t byte2)
 
 	// Send stop signal
 	I2C0->C1 &= ~I2C_C1_MST_MASK;
+	logger.Log_Write(__func__, mStatus, "I2C Write Operation Finished");
 }
