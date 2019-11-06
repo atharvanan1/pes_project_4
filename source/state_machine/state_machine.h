@@ -44,7 +44,7 @@ typedef struct {
 	int16_t temperature;
 	int16_t average_temperature;
 	uint8_t timeout_count;
-	uint32_t counter;
+	uint8_t counter;
 	uint8_t timeout_started;
 	uint8_t disconnect;
 	uint8_t alert;

@@ -24,6 +24,11 @@ state_struct LookUpTable[] = {{sTemperature_Reading, {fStart, fRead_Complete, fT
 #define F_TIMEOUT_COMPLETE		event_action[2]
 #define F_ALERT					event_action[3]
 #define F_DISCONNECT			event_action[4]
+
+void average_temperature(system_state_t* system)
+{
+	system->average_temperature = (system->average_temperature + system->temperature) / 2;
+}
 /*
  * Function -
  */
@@ -104,20 +109,21 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 				Set_Event(sm, eAlert);
 			else if (sm->type == Table_Driven)
 				S_TEMPERATURE_READING.F_ALERT(sm);
+			system->alert = 0;
 		}
-		if(system->disconnect == 1)
+		else if(system->disconnect == 1)
 		{
 			if(sm->type == State_Driven)
 				Set_Event(sm, eDisconnect);
 			else if (sm->type == Table_Driven)
 				S_TEMPERATURE_READING.F_DISCONNECT(sm);
 		}
-		if(sm->event == eStart)
+		else if(sm->event == eStart)
 		{
 			Print_Message(Reading_Temperature);
-//			I2C_Init();
-//			int16_t temp = I2C_Read_Temperature();
-//			system->temperature = Get_Temperature(temp);
+			I2C_Init();
+			int16_t temp = I2C_Read(TMP102.tmp_reg_address);
+			system->temperature = Get_Temperature(temp);
 			logger.Log_Write("Temperature is %d\n\r", system->temperature);
 			Print_Message(Reading_Temperature_Complete);
 			Set_State(sm, sAverage_Wait);
@@ -126,19 +132,19 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 			else if (sm->type == Table_Driven)
 				S_TEMPERATURE_READING.F_READ_COMPLETE(sm);
 		}
-		if(sm->event == eRead_Complete)
+		else if(sm->event == eRead_Complete)
 		{
 			;
 		}
-		if(sm->event == eAlert)
+		else if(sm->event == eAlert)
 		{
 			Set_State(sm, sTemperature_Alert);
 		}
-		if(sm->event == eTimeout_Complete)
+		else if(sm->event == eTimeout_Complete)
 		{
 			;
 		}
-		if(sm->event == eDisconnect)
+		else if(sm->event == eDisconnect)
 		{
 			Set_State(sm, sDisconnected);
 		}
@@ -151,10 +157,11 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 			else if (sm->type == Table_Driven)
 				S_AVERAGE_WAIT.F_DISCONNECT(sm);
 		}
-		if(sm->event == eRead_Complete)
+		else if(sm->event == eRead_Complete)
 		{
 			if(system->timeout_started != 1)
 			{
+				average_temperature(system);
 				Print_Message(Waiting);
 				system->counter = 0;
 				system->timeout_started = 1;
@@ -170,19 +177,23 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 						S_AVERAGE_WAIT.F_TIMEOUT_COMPLETE(sm);
 					Print_Message(Timeout);
 					system->timeout_started = 0;
+					system->counter = 0;
+					SysTick->CTRL = 0;
 				}
 			}
 		}
-		if(sm->event == eAlert)
+		else if(sm->event == eAlert)
 		{
 			;
 		}
-		if(sm->event == eTimeout_Complete)
+		else if(sm->event == eTimeout_Complete)
 		{
 			system->timeout_count++;
-			if(system->timeout_count)
+			if(system->timeout_count == 4)
 			{
-				//End this state machine, find out how
+				system->state_machine_id = 2;
+				system->timeout_count = 0;
+
 			}
 			Set_State(sm, sTemperature_Reading);
 			if(sm->type == State_Driven)
@@ -190,7 +201,7 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 			else if (sm->type == Table_Driven)
 				S_AVERAGE_WAIT.F_START(sm);
 		}
-		if(sm->event == eDisconnect)
+		else if(sm->event == eDisconnect)
 		{
 			Set_State(sm, sDisconnected);
 		}
@@ -203,18 +214,16 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 			else if (sm->type == Table_Driven)
 				S_AVERAGE_WAIT.F_DISCONNECT(sm);
 		}
-		if(sm->event == eAlert)
+		else if(sm->event == eAlert)
 		{
 			Print_Message(Alert_LOW_Temperature);
-			if((GPIOA->PDIR & ALERT_PIN) == 0)
-				system->alert = 0;
 			Set_State(sm, sAverage_Wait);
 			if(sm->type == State_Driven)
 				Set_Event(sm, eRead_Complete);
 			else if (sm->type == Table_Driven)
 				S_AVERAGE_WAIT.F_READ_COMPLETE(sm);
 		}
-		if(sm->event == eDisconnect)
+		else if(sm->event == eDisconnect)
 		{
 			Set_State(sm, sDisconnected);
 		}
