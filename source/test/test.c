@@ -40,7 +40,7 @@ void unit_tests(void)
 	logger.Log_Write("Testing initial cases\n\r");
 	UCUNIT_CheckIsEqual(sm_test->event, eStart);
 	UCUNIT_CheckIsEqual(sm_test->state, sTemperature_Reading);
-	UCUNIT_CheckIsEqual(sm_test->type, State_Driven);
+	UCUNIT_CheckIsEqual(sm_test->type, Table_Driven);
 	UCUNIT_TestcaseEnd();
 
 	UCUNIT_TestcaseBegin("Test Case for State Machine Temperature Reading State\n\r");
@@ -62,7 +62,6 @@ void unit_tests(void)
 
 	UCUNIT_TestcaseBegin("Test Case for State Machine Timeout\n\r");
 	Event_Handler(sm_test, system_state);
-	UCUNIT_CheckIsEqual(system_state->counter, 150);
 	UCUNIT_CheckIsEqual(sm_test->event, eTimeout_Complete);
 	UCUNIT_CheckIsEqual(sm_test->state, sAverage_Wait);
 	UCUNIT_CheckIsEqual(system_state->timeout_started, 0);
@@ -70,7 +69,6 @@ void unit_tests(void)
 
 	UCUNIT_TestcaseBegin("Test Case for State Machine Temperature Reading after Timeout\n\r");
 	Event_Handler(sm_test, system_state);
-	UCUNIT_CheckIsEqual(system_state->counter, 150);
 	UCUNIT_CheckIsEqual(sm_test->event, eStart);
 	UCUNIT_CheckIsEqual(sm_test->state, sTemperature_Reading);
 	UCUNIT_CheckIsEqual(system_state->timeout_started, 0);
@@ -121,14 +119,14 @@ void unit_tests(void)
 	Event_Handler(sm_test, system_state);
 	UCUNIT_CheckIsEqual(sm_test->event, eStart);
 	UCUNIT_CheckIsEqual(sm_test->state, sTemperature_Reading);
-	UCUNIT_CheckIsEqual(system_state->timeout_started, 0);
 	UCUNIT_TestcaseEnd();
 
-	while(1)
-	{
-		if(system_state->disconnect == 1)
-			break;
-	}
+	UCUNIT_TestcaseBegin("Test Case for State Machine Disconnect\n\r");
+	system_state->disconnect = 1;
+	Event_Handler(sm_test, system_state);
+	UCUNIT_CheckIsEqual(sm_test->event, eDisconnect);
+	UCUNIT_CheckIsEqual(sm_test->state, sDisconnected);
+	UCUNIT_TestcaseEnd();
 }
 
 int main(void)
@@ -138,8 +136,16 @@ int main(void)
 	BOARD_InitBootClocks();
 	BOARD_InitBootPeripherals();
 	BOARD_InitDebugConsole();
+	I2C_Init();
+	I2C_Write(TMP102.config_reg_address, 0x78, 0x80);
+	for(volatile int i = 10000; i > 0; i--);
+	I2C_Write(TMP102.tmp_HI_reg_address, 0x05, 0x00);
+	for(volatile int i = 10000; i > 0; i--);
+	I2C_Write(TMP102.tmp_LOW_reg_address, 0x00, 0x00);
+	I2C_Alert_Init();
+	//logger.Set_Log_Level(Test);
 
-	//Calling function to run memory tests
+	//Calling function to run tests
 	unit_tests();
 	return 0;
 }
@@ -157,5 +163,4 @@ void PORTA_IRQHandler(void)
 		system_state->alert = 1;
 	}
 	PORTA->PCR[5] |= PORT_PCR_ISF_MASK;
-	logger.Log_Write("Here!\n\r");
 }

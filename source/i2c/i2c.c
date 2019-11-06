@@ -17,13 +17,6 @@ uint8_t I2C_Init(void)
 	PORTC->PCR[8] |= PORT_PCR_MUX(2);
 	PORTC->PCR[9] |= PORT_PCR_MUX(2);
 
-	// Port A Pin 5 setup - GPIO, Rising Edge Interrupt, Pulldown
-	PORTA->PCR[5] |= PORT_PCR_MUX(1) | PORT_PCR_IRQC(0x09) | PORT_PCR_PE_MASK;
-	PORTA->PCR[5] &= ~PORT_PCR_PS_MASK;
-	GPIOA->PDDR &= ~ALERT_PIN;
-	NVIC_EnableIRQ(PORTA_IRQn);
-
-
 	// Configuring I2C Peripheral
 	I2C0->F |= I2C_F_MULT(0x00);
 	I2C0->F	|= I2C_F_ICR(0x3D);
@@ -33,9 +26,14 @@ uint8_t I2C_Init(void)
 	return 1;
 }
 
-uint8_t I2C_Check_Connect(void)
+uint8_t I2C_Alert_Init(void)
 {
-
+	// Port A Pin 5 setup - GPIO, Rising Edge Interrupt, Pulldown
+	PORTA->PCR[5] |= PORT_PCR_MUX(1) | PORT_PCR_IRQC(0x09) | PORT_PCR_PE_MASK;
+	PORTA->PCR[5] &= ~PORT_PCR_PS_MASK;
+	GPIOA->PDDR &= ~ALERT_PIN;
+	NVIC_EnableIRQ(PORTA_IRQn);
+	return 1;
 }
 
 uint16_t I2C_Read(uint8_t register_address)
@@ -51,11 +49,7 @@ uint16_t I2C_Read(uint8_t register_address)
 	I2C0->D = (TMP102.address << 1) | WRITE;
 
 	// Wait for ACK
-	while(1)
-	{
-		if((I2C0->S & I2C_S_IICIF_MASK) == 0)
-			break;
-	}
+	while((I2C0->S & I2C_S_IICIF_MASK) == 0);
 	I2C0->S |= I2C_S_IICIF_MASK;
 
 	// Send slave address

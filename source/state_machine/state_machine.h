@@ -13,6 +13,7 @@
 #include "errno.h"
 #include "tmp102.h"
 #include "i2c.h"
+#include "led_control.h"
 
 typedef enum {
 	eStart = 0x00,

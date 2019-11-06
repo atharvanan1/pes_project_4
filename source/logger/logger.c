@@ -20,7 +20,20 @@ void Log_Write(const char *msg, ... )
 	va_start(args, msg);
 
 	// Log Level Logic
+	switch(thisLogger.Logger_Log_Level)
+	{
+	case Test:
+		printf("Test: ");
+		break;
+	case Debug:
+		printf("Debug: ");
+		break;
+	case Normal:
+		printf("Run: ");
+		break;
+	}
 
+//	Print_Function_Name(function_name_t function_name);
 
 	// Pure print
 	vprintf(msg, args);

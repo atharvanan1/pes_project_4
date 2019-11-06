@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "board.h"
+#include "logger.h"
 #define RED 	0
 #define BLUE  	1
 #define GREEN  	2

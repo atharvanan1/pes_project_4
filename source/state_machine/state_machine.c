@@ -9,7 +9,7 @@
 #include "state_machine.h"
 
 state_struct LookUpTable[] = {{sTemperature_Reading, {fStart, fRead_Complete, fTimeoutComplete, fAlert, fDisconnect}},
-							  {sAverage_Wait, {NULL, fRead_Complete, fTimeoutComplete, NULL, fDisconnect}},
+							  {sAverage_Wait, {fStart, fRead_Complete, fTimeoutComplete, NULL, fDisconnect}},
 							  {sTemperature_Alert, {NULL, fRead_Complete, NULL, fAlert, fDisconnect}},
 							  {sDisconnected, {NULL, NULL, NULL, NULL, fDisconnect}},
 							  };
@@ -120,6 +120,7 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 		}
 		else if(sm->event == eStart)
 		{
+			Turn_On_Only_LED(GREEN);
 			Print_Message(Reading_Temperature);
 			I2C_Init();
 			int16_t temp = I2C_Read(TMP102.tmp_reg_address);
@@ -188,6 +189,7 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 		}
 		else if(sm->event == eTimeout_Complete)
 		{
+			Turn_On_Only_LED(GREEN);
 			system->timeout_count++;
 			if(system->timeout_count == 4)
 			{
@@ -216,6 +218,7 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 		}
 		else if(sm->event == eAlert)
 		{
+			Turn_On_Only_LED(BLUE);
 			Print_Message(Alert_LOW_Temperature);
 			Set_State(sm, sAverage_Wait);
 			if(sm->type == State_Driven)
@@ -231,8 +234,9 @@ void Event_Handler(state_machine_t* sm, system_state_t* system)
 	case sDisconnected:
 		if(sm->event == eDisconnect)
 		{
+			Turn_On_Only_LED(RED);
 			Print_Message(Device_Disconnected);
-			exit(1);
+			End_Program();
 		}
 		break;
 	}
