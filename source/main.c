@@ -1,9 +1,11 @@
-/*
- * main.c
- *
- *  Created on: Oct 30, 2019
- *      Author: azzentys
- */
+/**
+  * File Name 		- main.c
+  * Description 	- main routine
+  * Author			- Atharva Nandanwar
+  * Tools			- GNU C Compiler / ARM Compiler Toolchain
+  * Leveraged Code 	-
+  * URL				-
+  */
 
 #include "main.h"
 

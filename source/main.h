@@ -1,10 +1,11 @@
-/*
- * main.h
- *
- *  Created on: Oct 31, 2019
- *      Author: azzentys
- */
-
+/**
+  * File Name 		- main.h
+  * Description 	- main routine header
+  * Author			- Atharva Nandanwar
+  * Tools			- GNU C Compiler / ARM Compiler Toolchain
+  * Leveraged Code 	-
+  * URL				-
+  */
 #ifndef MAIN_H_
 #define MAIN_H_
 #include <stdint.h>
